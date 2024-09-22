@@ -1,0 +1,572 @@
+<html><head><base href="https://universidade.edu/processo-seletivo/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sistema de Processo Seletivo - Universidade</title><style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    h1, h2, h3 {
+        color: #003366;
+    }
+    .form-container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    input[type="text"], input[type="password"], input[type="date"], select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+    }
+    button {
+        padding: 10px 20px;
+        background-color: #003366;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+    button:hover {
+        background-color: #002244;
+    }
+    .error {
+        color: red;
+    }
+    .success {
+        color: green;
+    }
+    .dashboard {
+        display: none;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #003366;
+        color: white;
+    }
+    .sidemenu {
+        width: 200px;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        background-color: #003366;
+        overflow-x: hidden;
+        padding-top: 20px;
+        height: 100%;
+    }
+    .sidemenu a {
+        padding: 6px 8px 6px 16px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #f0f0f0;
+        display: block;
+    }
+    .sidemenu a:hover {
+        background-color: #002244;
+    }
+    .container {
+        margin-left: 200px;
+    }
+</style></head><body>
+    <div class="container">
+        <h1>Sistema de Processo Seletivo</h1>
+        
+        <div id="loginForm" class="form-container">
+            <h2>Login</h2>
+            <input type="text" id="loginUsername" placeholder="Usuário">
+            <input type="password" id="loginPassword" placeholder="Senha">
+            <button onclick="login()">Entrar</button>
+            <button onclick="showRegisterForm()">Cadastre-se</button>
+            <p id="loginMessage"></p>
+        </div>
+
+        <div id="registerForm" class="form-container" style="display:none;">
+            <h2>Cadastro</h2>
+            <input type="text" id="regUsername" placeholder="Usuário">
+            <input type="password" id="regPassword" placeholder="Senha">
+            <button onclick="register()">Cadastrar</button>
+            <button onclick="showLoginForm()">Voltar para Login</button>
+            <p id="registerMessage"></p>
+        </div>
+
+        <div id="adminDashboard" class="dashboard">
+            <div class="sidemenu">
+                <a href="#" onclick="showAdminSection('processoSeletivo')">Processo Seletivo</a>
+                <a href="#" onclick="showAdminSection('formularioInscricao')">Formulário de Inscrição</a>
+                <a href="#" onclick="showAdminSection('atualizarStatus')">Atualizar Status</a>
+                <a href="#" onclick="showAdminSection('listaInscricoes')">Lista de Inscrições</a>
+                <a href="#" onclick="showAdminSection('notasEnem')">Notas ENEM</a>
+                <a href="#" onclick="showAdminSection('preMatricula')">Pré-Matrícula</a>
+                <a href="#" onclick="showAdminSection('exportarListas')">Exportar Listas</a>
+            </div>
+            <h2>Painel do Administrador</h2>
+            <div id="adminProcessoSeletivo" class="admin-section">
+                <h3>Gerenciar Processo Seletivo</h3>
+                <input type="text" id="processName" placeholder="Nome do Processo Seletivo">
+                <textarea id="processDescription" placeholder="Descrição"></textarea>
+                <input type="date" id="startDate" placeholder="Data de Início">
+                <input type="date" id="endDate" placeholder="Data de Término">
+                <button onclick="saveProcess()">Adicionar/Atualizar Processo</button>
+                <button onclick="deleteProcess()">Excluir Processo</button>
+            </div>
+            <div id="adminFormularioInscricao" class="admin-section">
+                <h3>Gerenciar Formulário de Inscrição</h3>
+                <textarea id="formFields" placeholder="Campos do formulário (separados por vírgula)"></textarea>
+                <button onclick="saveForm()">Salvar Formulário</button>
+                <button onclick="deleteForm()">Excluir Formulário</button>
+            </div>
+            <div id="adminAtualizarStatus" class="admin-section">
+                <h3>Atualizar Status de Inscrição</h3>
+                <input type="text" id="candidateId" placeholder="ID do Candidato">
+                <select id="status">
+                    <option value="homologada">Inscrição Homologada</option>
+                    <option value="naoHomologada">Não Homologada</option>
+                    <option value="aguardando">Aguarde Atualização</option>
+                </select>
+                <button onclick="updateStatus()">Atualizar Status</button>
+            </div>
+            <div id="adminListaInscricoes" class="admin-section">
+                <h3>Lista de Inscrições</h3>
+                <table id="adminInscriptionsTable">
+                    <tr>
+                        <th>ID do Candidato</th>
+                        <th>Processo Seletivo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </table>
+            </div>
+            <div id="adminNotasEnem" class="admin-section">
+                <h3>Gerenciar Notas ENEM</h3>
+                <textarea id="enemFields" placeholder="Campos do formulário ENEM (separados por vírgula)"></textarea>
+                <button onclick="saveEnemForm()">Salvar Formulário ENEM</button>
+                <h3>Lista de Candidatos por Modalidade</h3>
+                <select id="modalidadeConcorrencia">
+                    <option value="">Selecione a modalidade</option>
+                </select>
+                <button onclick="gerarListaEnem()">Gerar Lista</button>
+                <button onclick="gerarPDFEnem()">Gerar PDF</button>
+                <div id="listaEnemCandidatos"></div>
+            </div>
+            <div id="adminPreMatricula" class="admin-section">
+                <h3>Gerenciar Pré-Matrícula</h3>
+                <textarea id="preMatriculaFields" placeholder="Campos do formulário de pré-matrícula (separados por vírgula)"></textarea>
+                <button onclick="savePreMatriculaForm()">Salvar Formulário Pré-Matrícula</button>
+                <h3>Atualizar Status de Pré-Matrícula</h3>
+                <input type="text" id="preMatriculaCandidateId" placeholder="ID do Candidato">
+                <select id="preMatriculaStatus">
+                    <option value="aprovada">Matrícula Aprovada</option>
+                    <option value="analise">Em Análise</option>
+                    <option value="naoMatriculado">Não Matriculado</option>
+                </select>
+                <button onclick="updatePreMatriculaStatus()">Atualizar Status</button>
+            </div>
+            <div id="adminExportarListas" class="admin-section">
+                <h3>Exportar Listas</h3>
+                <button onclick="exportarListaClassificados()">Exportar Lista de Classificados</button>
+            </div>
+        </div>
+
+        <div id="candidateDashboard" class="dashboard">
+            <div class="sidemenu">
+                <a href="#" onclick="showCandidateSection('inscricao')">Inscrição</a>
+                <a href="#" onclick="showCandidateSection('statusInscricoes')">Status das Inscrições</a>
+                <a href="#" onclick="showCandidateSection('notasEnem')">Notas ENEM</a>
+                <a href="#" onclick="showCandidateSection('preMatricula')">Pré-Matrícula</a>
+            </div>
+            <h2>Painel do Candidato</h2>
+            <div id="candidateInscricao" class="candidate-section">
+                <h3>Inscrição em Processo Seletivo</h3>
+                <div id="inscriptionForm"></div>
+                <button onclick="submitInscription()">Enviar Inscrição</button>
+                <button onclick="editInscription()">Editar Inscrição</button>
+                <button onclick="deleteInscription()">Excluir Inscrição</button>
+            </div>
+            <div id="candidateStatusInscricoes" class="candidate-section">
+                <h3>Status das Inscrições</h3>
+                <table id="statusTable">
+                    <tr>
+                        <th>Processo Seletivo</th>
+                        <th>Status</th>
+                    </tr>
+                </table>
+            </div>
+            <div id="candidateNotasEnem" class="candidate-section">
+                <h3>Adicionar Notas ENEM</h3>
+                <div id="enemForm"></div>
+                <button onclick="submitEnemScores()">Enviar Notas</button>
+                <h3>Boletim de Notas</h3>
+                <div id="enemScoresReport"></div>
+            </div>
+            <div id="candidatePreMatricula" class="candidate-section">
+                <h3>Pré-Matrícula</h3>
+                <div id="preMatriculaForm"></div>
+                <button onclick="submitPreMatricula()">Enviar Documentação</button>
+                <h3>Status da Pré-Matrícula</h3>
+                <div id="preMatriculaStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentUser = null;
+    let processes = [];
+    let inscriptionForm = [];
+    let inscriptions = [];
+    let enemForm = [];
+    let preMatriculaForm = [];
+    let enemScores = [];
+    let preMatriculas = [];
+
+    function login() {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        const loginMessage = document.getElementById('loginMessage');
+
+        if ((username === '123' && password === '123') || (username === 'candidato' && password === 'candidato')) {
+            currentUser = { username, isAdmin: username === '123' };
+            loginMessage.textContent = 'Login bem-sucedido!';
+            loginMessage.className = 'success';
+            showDashboard();
+        } else {
+            loginMessage.textContent = 'Usuário ou senha incorretos.';
+            loginMessage.className = 'error';
+        }
+    }
+
+    function register() {
+        const username = document.getElementById('regUsername').value;
+        const password = document.getElementById('regPassword').value;
+        const registerMessage = document.getElementById('registerMessage');
+
+        if (username && password) {
+            registerMessage.textContent = 'Cadastro realizado com sucesso!';
+            registerMessage.className = 'success';
+            showLoginForm();
+        } else {
+            registerMessage.textContent = 'Por favor, preencha todos os campos.';
+            registerMessage.className = 'error';
+        }
+    }
+
+    function showLoginForm() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registerForm').style.display = 'none';
+    }
+
+    function showRegisterForm() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+    }
+
+    function showDashboard() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'none';
+        if (currentUser.isAdmin) {
+            document.getElementById('adminDashboard').style.display = 'block';
+            showAdminSection('processoSeletivo');
+            displayAdminInscriptions();
+        } else {
+            document.getElementById('candidateDashboard').style.display = 'block';
+            showCandidateSection('inscricao');
+            updateCandidateDashboard();
+        }
+    }
+
+    function showAdminSection(section) {
+        const sections = document.querySelectorAll('.admin-section');
+        sections.forEach(s => s.style.display = 'none');
+        document.getElementById(`admin${section.charAt(0).toUpperCase() + section.slice(1)}`).style.display = 'block';
+    }
+
+    function showCandidateSection(section) {
+        const sections = document.querySelectorAll('.candidate-section');
+        sections.forEach(s => s.style.display = 'none');
+        document.getElementById(`candidate${section.charAt(0).toUpperCase() + section.slice(1)}`).style.display = 'block';
+    }
+
+    function saveProcess() {
+        const name = document.getElementById('processName').value;
+        const description = document.getElementById('processDescription').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        const process = { name, description, startDate, endDate };
+        const index = processes.findIndex(p => p.name === name);
+
+        if (index !== -1) {
+            processes[index] = process;
+        } else {
+            processes.push(process);
+        }
+
+        alert('Processo salvo com sucesso!');
+        displayAdminInscriptions();
+    }
+
+    function deleteProcess() {
+        const name = document.getElementById('processName').value;
+        processes = processes.filter(p => p.name !== name);
+        alert('Processo excluído com sucesso!');
+        displayAdminInscriptions();
+    }
+
+    function saveForm() {
+        const fields = document.getElementById('formFields').value.split(',');
+        inscriptionForm = fields.map(field => field.trim());
+        alert('Formulário salvo com sucesso!');
+        displayAdminInscriptions();
+        updateCandidateDashboard();
+    }
+
+    function deleteForm() {
+        inscriptionForm = [];
+        alert('Formulário excluído com sucesso!');
+        displayAdminInscriptions();
+        updateCandidateDashboard();
+    }
+
+    function updateStatus() {
+        const candidateId = document.getElementById('candidateId').value;
+        const status = document.getElementById('status').value;
+        const inscription = inscriptions.find(i => i.candidateId === candidateId);
+        
+        if (inscription) {
+            inscription.status = status;
+            alert('Status atualizado com sucesso!');
+            displayAdminInscriptions();
+        } else {
+            alert('Candidato não encontrado.');
+        }
+    }
+
+    function displayAdminInscriptions() {
+        const table = document.getElementById('adminInscriptionsTable');
+        table.innerHTML = '<tr><th>ID do Candidato</th><th>Processo Seletivo</th><th>Status</th><th>Ações</th></tr>';
+        inscriptions.forEach(inscription => {
+            const row = table.insertRow();
+            row.insertCell(0).textContent = inscription.candidateId;
+            row.insertCell(1).textContent = inscription.processName;
+            row.insertCell(2).textContent = inscription.status;
+            const actionsCell = row.insertCell(3);
+            const viewButton = document.createElement('button');
+            viewButton.textContent = 'Ver Detalhes';
+            viewButton.onclick = () => viewInscriptionDetails(inscription);
+            actionsCell.appendChild(viewButton);
+        });
+    }
+
+    function viewInscriptionDetails(inscription) {
+        let details = `Detalhes da Inscrição:\n\n`;
+        details += `ID do Candidato: ${inscription.candidateId}\n`;
+        details += `Processo Seletivo: ${inscription.processName}\n`;
+        details += `Status: ${inscription.status}\n\n`;
+        details += `Dados da Inscrição:\n`;
+        for (const [key, value] of Object.entries(inscription.data)) {
+            details += `${key}: ${value}\n`;
+        }
+        alert(details);
+    }
+
+    function updateCandidateDashboard() {
+        const form = document.getElementById('inscriptionForm');
+        form.innerHTML = '';
+        inscriptionForm.forEach(field => {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = field;
+            input.id = `field_${field}`;
+            form.appendChild(input);
+        });
+
+        const table = document.getElementById('statusTable');
+        table.innerHTML = '<tr><th>Processo Seletivo</th><th>Status</th></tr>';
+        inscriptions.forEach(inscription => {
+            const row = table.insertRow();
+            row.insertCell(0).textContent = inscription.processName;
+            row.insertCell(1).textContent = inscription.status;
+        });
+        
+        const enemFormElement = document.getElementById('enemForm');
+        enemFormElement.innerHTML = '';
+        enemForm.forEach(field => {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.placeholder = field;
+            input.id = `enem_${field}`;
+            enemFormElement.appendChild(input);
+        });
+        
+        const enemScoresReport = document.getElementById('enemScoresReport');
+        const candidateScores = enemScores.find(score => score.candidateId === currentUser.username);
+        if (candidateScores) {
+            enemScoresReport.innerHTML = '<h4>Suas Notas:</h4>';
+            for (const [key, value] of Object.entries(candidateScores)) {
+                if (key !== 'candidateId' && key !== 'modalidade') {
+                    enemScoresReport.innerHTML += `<p>${key}: ${value}</p>`;
+                }
+            }
+        } else {
+            enemScoresReport.innerHTML = '<p>Nenhuma nota ENEM registrada.</p>';
+        }
+
+        const preMatriculaFormElement = document.getElementById('preMatriculaForm');
+        preMatriculaFormElement.innerHTML = '';
+        preMatriculaForm.forEach(field => {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = field;
+            input.id = `preMatricula_${field}`;
+            preMatriculaFormElement.appendChild(input);
+        });
+
+        const preMatriculaStatus = document.getElementById('preMatriculaStatus');
+        const candidatePreMatricula = preMatriculas.find(pm => pm.candidateId === currentUser.username);
+        if (candidatePreMatricula) {
+            preMatriculaStatus.textContent = `Status: ${candidatePreMatricula.status}`;
+        } else {
+            preMatriculaStatus.textContent = 'Status: Não enviado';
+        }
+    }
+
+    function submitInscription() {
+        const processName = processes[0]?.name || 'Processo Padrão';
+        const inscription = {
+            candidateId: currentUser.username,
+            processName: processName,
+            status: 'aguardando',
+            data: {}
+        };
+
+        inscriptionForm.forEach(field => {
+            inscription.data[field] = document.getElementById(`field_${field}`).value;
+        });
+
+        inscriptions.push(inscription);
+        alert('Inscrição enviada com sucesso!');
+        updateCandidateDashboard();
+        displayAdminInscriptions();
+    }
+
+    function editInscription() {
+        const inscription = inscriptions.find(i => i.candidateId === currentUser.username);
+        if (inscription) {
+            inscriptionForm.forEach(field => {
+                document.getElementById(`field_${field}`).value = inscription.data[field] || '';
+            });
+            alert('Carregue os dados da inscrição para edição.');
+        } else {
+            alert('Nenhuma inscrição encontrada para editar.');
+        }
+    }
+
+    function deleteInscription() {
+        inscriptions = inscriptions.filter(i => i.candidateId !== currentUser.username);
+        alert('Inscrição excluída com sucesso!');
+        updateCandidateDashboard();
+        displayAdminInscriptions();
+    }
+
+    function saveEnemForm() {
+        const fields = document.getElementById('enemFields').value.split(',');
+        enemForm = fields.map(field => field.trim());
+        alert('Formulário ENEM salvo com sucesso!');
+        updateCandidateDashboard();
+    }
+
+    function gerarListaEnem() {
+        const modalidade = document.getElementById('modalidadeConcorrencia').value;
+        const candidatosFiltrados = enemScores.filter(score => score.modalidade === modalidade);
+        candidatosFiltrados.sort((a, b) => b.total - a.total);
+        
+        const listaElement = document.getElementById('listaEnemCandidatos');
+        listaElement.innerHTML = '<h4>Candidatos:</h4>';
+        candidatosFiltrados.forEach(score => {
+            listaElement.innerHTML += `<p>${score.candidateId}: ${score.total} pontos</p>`;
+        });
+    }
+
+    function gerarPDFEnem() {
+        alert('Funcionalidade de geração de PDF não implementada neste exemplo.');
+    }
+
+    function savePreMatriculaForm() {
+        const fields = document.getElementById('preMatriculaFields').value.split(',');
+        preMatriculaForm = fields.map(field => field.trim());
+        alert('Formulário de Pré-Matrícula salvo com sucesso!');
+        updateCandidateDashboard();
+    }
+
+    function updatePreMatriculaStatus() {
+        const candidateId = document.getElementById('preMatriculaCandidateId').value;
+        const status = document.getElementById('preMatriculaStatus').value;
+        const preMatricula = preMatriculas.find(pm => pm.candidateId === candidateId);
+        
+        if (preMatricula) {
+            preMatricula.status = status;
+            alert('Status de pré-matrícula atualizado com sucesso!');
+        } else {
+            alert('Candidato não encontrado.');
+        }
+    }
+
+    function exportarListaClassificados() {
+        alert('Funcionalidade de exportação de lista não implementada neste exemplo.');
+    }
+
+    function submitEnemScores() {
+        const scores = {
+            candidateId: currentUser.username,
+            modalidade: document.getElementById('field_modalidade').value,
+            total: 0
+        };
+        
+        enemForm.forEach(field => {
+            const value = parseFloat(document.getElementById(`enem_${field}`).value);
+            scores[field] = value;
+            scores.total += value;
+        });
+        
+        enemScores.push(scores);
+        alert('Notas ENEM enviadas com sucesso!');
+        updateCandidateDashboard();
+    }
+
+    function submitPreMatricula() {
+        const preMatricula = {
+            candidateId: currentUser.username,
+            status: 'analise',
+            data: {}
+        };
+        
+        preMatriculaForm.forEach(field => {
+            preMatricula.data[field] = document.getElementById(`preMatricula_${field}`).value;
+        });
+        
+        preMatriculas.push(preMatricula);
+        alert('Documentação de pré-matrícula enviada com sucesso!');
+        updateCandidateDashboard();
+    }
+
+    // Inicialização
+    showLoginForm();
+    </script>
+</body></html>
